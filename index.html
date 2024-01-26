@@ -1,0 +1,111 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Contract Frontend</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.3.4/dist/web3.min.js"></script>
+</head>
+<body>
+    <h1>Smart Contract Frontend</h1>
+
+    <div>
+        <label for="setValueInput">Set Value:</label>
+        <input type="number" id="setValueInput" />
+        <button onclick="setValue()">Set</button>
+    </div>
+
+    <div>
+        <button onclick="incrementValue()">Increment</button>
+        <button onclick="decrementValue()">Decrement</button>
+    </div>
+
+    <div>
+        <h3>Current Value:</h3>
+        <p id="currentValue"></p>
+    </div>
+
+    <script>
+        // Connect to the Ethereum network using web3.js
+        const web3 = new Web3(Web3.givenProvider);
+
+        // Replace with your smart contract address and ABI
+        const contractAddress = '0xd9145CCE52D386f254917e481eB44e9943F39138';
+        const contractABI = [
+        {
+            "inputs": [],
+            "name": "decrementValue",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "incrementValue",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "_value",
+                    "type": "uint256"
+                }
+            ],
+            "name": "setValue",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "value",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        }
+    ];
+
+        const contractInstance = new web3.eth.Contract(contractABI, contractAddress);
+
+        // Functions to interact with the smart contract
+        async function setValue() {
+            const valueInput = document.getElementById('setValueInput').value;
+            await contractInstance.methods.setValue(valueInput).send({ from: web3.eth.defaultAccount });
+            updateCurrentValue();
+        }
+
+        async function incrementValue() {
+            await contractInstance.methods.incrementValue().send({ from: web3.eth.defaultAccount });
+            updateCurrentValue();
+        }
+
+        async function decrementValue() {
+            await contractInstance.methods.decrementValue().send({ from: web3.eth.defaultAccount });
+            updateCurrentValue();
+        }
+
+        async function updateCurrentValue() {
+            const currentValue = await contractInstance.methods.value().call();
+            document.getElementById('currentValue').innerText = currentValue;
+        }
+
+        // Set the default account
+        web3.eth.getAccounts().then(accounts => {
+            web3.eth.defaultAccount = accounts[0];
+        });
+
+        // Initial update of the current value
+        updateCurrentValue();
+    </script>
+</body>
+</html>
